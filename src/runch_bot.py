@@ -3,6 +3,7 @@ from discord.ext import commands
 from graph import HomiePointsGraph
 import os
 from dotenv import load_dotenv
+from storage import load_graph, save_graph
 
 load_dotenv(".env")
 TOKEN: str = os.getenv("TOKEN")
@@ -12,7 +13,7 @@ intents.message_content = True
 intents.members = True # Enable member intents to access user information
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-homie_points = HomiePointsGraph()
+homie_points = load_graph()
 
 @bot.event
 async def on_ready():
@@ -25,6 +26,7 @@ async def add_debt(ctx, from_user: discord.Member, to_user: discord.Member, poin
     """Add debt from one user to another."""
     homie_points.add_debt(from_user.id, to_user.id, points)
     await ctx.send(f"{from_user.mention} now owes {to_user.mention} {points} homie points.")
+    save_graph(homie_points)
 
 @bot.command(name="get_debt")
 async def get_debt(ctx, from_user: discord.Member, to_user: discord.Member):
@@ -50,12 +52,18 @@ async def settle_debt(ctx, from_user: discord.Member, to_user:discord.Member):
     message = await ctx.send(f"{from_user.mention} has settled their debt with {to_user.mention}.")
     shake = "🤝"
     await message.add_reaction(shake)
+    save_graph(homie_points)
 
 
 @bot.command(name="show_all")
 async def show_all(ctx):
     """Show all debts in the system."""
     await ctx.send(str(homie_points))
+
+@bot.event
+async def on_disconnect():
+    save_graph(homie_points)
+    print("Graph saved.")
 
 # Replace 'YOUR_BOT_TOKEN' with your bot's token
 bot.run(TOKEN)
