@@ -2,6 +2,11 @@ class HomiePointsGraph:
     def __init__(self):
         self.graph = {}
 
+    def add_person(self, user_id):
+        """Add a user to the graph if they don't already exist."""
+        if user_id not in self.graph:
+            self.graph[user_id] = {}
+
     def add_debt(self, from_person, to_person, points):
         if from_person not in self.graph:
             self.add_person(from_person)
