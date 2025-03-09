@@ -1,5 +1,6 @@
 import pickle
 
+#Keeps track of each users set of movies they would like to watch
 class MovieList():
     def __init__(self):
         self.movies = {}
